@@ -8,6 +8,7 @@
         /* --- General & Reset --- */
         :root {
             --primary-color: #007aff;
+            --secondary-color: #5856d6; /* New color for gradient */
             --primary-light: rgba(0, 122, 255, 0.1);
             --dark-bg: #000000;
             --light-bg: #1c1c1e;
@@ -26,6 +27,33 @@
             line-height: 1.5;
         }
         .container { max-width: 900px; margin: 0 auto; padding: 0 15px; }
+        
+        /* --- Loader Styles --- */
+        #loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--dark-bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--border-color);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
         
         /* --- Header --- */
         .store-header {
@@ -46,33 +74,62 @@
         .store-logo-link:hover { transform: scale(1.1); }
         .store-logo-link:active { transform: scale(0.95); transition-duration: 0.1s; }
         .store-logo { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; display: block; }
-        .store-name { font-size: 1.5rem; font-weight: 700; }
         
+        /* --- NEW: Attractive Store Name --- */
+        .store-name { 
+            font-size: 1.5rem; 
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--primary-color));
+            background-size: 200% auto;
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            animation: text-gradient-flow 5s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+        @keyframes text-gradient-flow {
+            0% { background-position: 200% center; }
+            100% { background-position: 0% center; }
+        }
+        .store-name::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 7s infinite;
+            animation-delay: 2s;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
         /* --- Buttons --- */
         .btn {
-            display: inline-block;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            text-align: center;
-            text-decoration: none;
-            transition: background-color 0.2s, transform 0.1s;
+            display: inline-block; padding: 8px 16px; border: none; border-radius: 20px;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer; text-align: center;
+            text-decoration: none; transition: background-color 0.2s, transform 0.1s;
         }
         .btn-primary { background-color: var(--primary-light); color: var(--primary-color); }
         .btn-primary:hover { background-color: rgba(0, 122, 255, 0.2); }
         .btn:active { transform: scale(0.96); }
         
-        /* --- Attractive Donate Button --- */
+        /* --- Unique & Attractive Donate Button --- */
         #donate-btn {
-            animation: donateGlow 2.5s infinite;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white; padding: 8px 18px; display: flex; align-items: center; gap: 8px;
+            background-size: 200% 200%; animation: gradient-pulse 4s ease infinite;
         }
-        @keyframes donateGlow {
-            0% { box-shadow: 0 0 5px var(--primary-light), 0 0 10px var(--primary-light); }
-            50% { box-shadow: 0 0 15px var(--primary-light), 0 0 25px var(--primary-light); }
-            100% { box-shadow: 0 0 5px var(--primary-light), 0 0 10px var(--primary-light); }
+        #donate-btn svg { width: 16px; height: 16px; }
+        @keyframes gradient-pulse {
+            0% { background-position: 0% 50%; box-shadow: 0 0 8px var(--secondary-color); }
+            50% { background-position: 100% 50%; box-shadow: 0 0 20px var(--primary-color); }
+            100% { background-position: 0% 50%; box-shadow: 0 0 8px var(--secondary-color); }
         }
 
         /* --- Controls: Search & Filter --- */
@@ -84,15 +141,8 @@
         #category-filter { padding: 10px; background-color: var(--light-bg); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); }
         
         /* --- App List (GRID LAYOUT) --- */
-        #app-list {
-            padding: 0 15px 30px;
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 15px;
-        }
-        @media (min-width: 600px) {
-            #app-list { grid-template-columns: repeat(2, 1fr); }
-        }
+        #app-list { padding: 0 15px 30px; display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 600px) { #app-list { grid-template-columns: repeat(2, 1fr); } }
         .app-item { 
             display: flex; align-items: center; padding: 15px; border-radius: 12px; background-color: var(--light-bg);
             border: 1px solid var(--border-color); cursor: pointer; gap: 15px; transition: background-color 0.2s;
@@ -140,57 +190,28 @@
         #download-modal p { color: var(--text-secondary); margin-bottom: 20px; }
         .modal-actions { display: flex; flex-direction: column; gap: 12px; }
         
-        /* NEW: Improved Action Button Styles */
         .modal-actions .btn {
-            width: 100%;
-            background-color: var(--light-bg);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 12px;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.3s ease;
+            width: 100%; background-color: var(--light-bg); color: var(--text-primary);
+            border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s ease;
         }
-        .modal-actions .btn:hover {
-            background-color: var(--border-color);
-        }
-        .modal-actions .btn .btn-icon {
-            display: none; /* Hide checkmark by default */
-        }
+        .modal-actions .btn:hover { background-color: var(--border-color); }
+        .modal-actions .btn .btn-icon { display: none; }
         .modal-actions .btn.completed {
-            background-color: var(--success-color);
-            color: white;
-            border-color: var(--success-color);
-            font-weight: bold;
+            background-color: var(--success-color); color: white; border-color: var(--success-color); font-weight: bold;
         }
-        .modal-actions .btn.completed .btn-icon {
-            display: inline-block; /* Show checkmark when completed */
-        }
+        .modal-actions .btn.completed .btn-icon { display: inline-block; }
         
-        /* NEW: Download Button States */
         #modal-download-btn {
-            width: 100%;
-            padding: 12px;
-            font-size: 1.1rem;
-            margin-top: 20px;
-            border-radius: 10px;
-            transition: all 0.3s ease;
+            width: 100%; padding: 12px; font-size: 1.1rem; margin-top: 20px;
+            border-radius: 10px; transition: all 0.3s ease;
         }
         #modal-download-btn:disabled {
-            background-color: var(--light-bg); /* Fika/dull color */
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            cursor: not-allowed;
-            opacity: 0.6;
+            background-color: var(--light-bg); border: 1px solid var(--border-color);
+            color: var(--text-secondary); cursor: not-allowed; opacity: 0.6;
         }
-        #modal-download-btn.glowing { /* Glowing state */
-            background-color: var(--primary-color);
-            color: white;
-            animation: glow-pulse 2s infinite;
+        #modal-download-btn.glowing {
+            background-color: var(--primary-color); color: white; animation: glow-pulse 2s infinite;
         }
         @keyframes glow-pulse {
             0% { box-shadow: 0 0 4px var(--primary-color); }
@@ -206,6 +227,11 @@
     </style>
 </head>
 <body>
+    <!-- Loader -->
+    <div id="loader-overlay">
+        <div class="spinner"></div>
+    </div>
+
     <!-- Home View (App List) -->
     <div id="home-view">
         <header class="store-header">
@@ -215,7 +241,12 @@
                 </a>
                 <h1 id="header-name" class="store-name"></h1>
             </div>
-            <a href="#" id="donate-btn" class="btn btn-primary hidden" target="_blank">Donate</a>
+            <a href="#" id="donate-btn" class="btn hidden" target="_blank">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 1.314C12.438-3.248 23.534 4.735 8 15-7.534 4.736 3.562-3.248 8 1.314z"/>
+                </svg>
+                <span>Donate</span>
+            </a>
         </header>
         <main class="container">
             <div class="controls">
@@ -292,6 +323,7 @@
         const db = firebase.database();
 
         // --- DOM Elements ---
+        const loaderOverlay = document.getElementById('loader-overlay');
         const homeView = document.getElementById('home-view');
         const detailsView = document.getElementById('details-view');
         const headerLogo = document.getElementById('header-logo');
@@ -325,6 +357,7 @@
         let filters = { search: '', category: 'All' };
         let currentDownloadLink = '';
         let completedActions = new Set();
+        let isInitialLoad = true;
         
         const socialLinks = {
             1: "https://www.instagram.com/mr.xubham_1x?igsh=MWtuN3B6cmNnMW9pZQ==",
@@ -353,6 +386,14 @@
             db.ref('apps').on('value', snapshot => {
                 allApps = snapshot.val() || {};
                 renderAppList();
+                
+                if (isInitialLoad) {
+                    loaderOverlay.style.opacity = '0';
+                    setTimeout(() => {
+                        loaderOverlay.style.display = 'none';
+                    }, 500);
+                    isInitialLoad = false;
+                }
             });
         }
         
@@ -432,7 +473,7 @@
             completedActions.clear();
             modalActionButtons.forEach(btn => btn.classList.remove('completed'));
             modalDownloadBtn.disabled = true;
-            modalDownloadBtn.classList.remove('glowing'); // Reset glowing state
+            modalDownloadBtn.classList.remove('glowing');
             modalDownloadBtn.removeAttribute('href');
             modalDownloadBtn.removeAttribute('target');
             modalOverlay.classList.remove('hidden');
@@ -447,7 +488,7 @@
                 modalDownloadBtn.disabled = false;
                 modalDownloadBtn.href = currentDownloadLink;
                 modalDownloadBtn.target = "_blank";
-                modalDownloadBtn.classList.add('glowing'); // Add glowing class
+                modalDownloadBtn.classList.add('glowing');
             }
         }
         
