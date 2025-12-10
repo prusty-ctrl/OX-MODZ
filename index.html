@@ -9,7 +9,7 @@
         :root {
             --primary-color: #007aff;
             --secondary-color: #5856d6;
-            --primary-light: rgba(0, 122, 255, 0.15); /* Made the blue slightly more visible */
+            --primary-light: rgba(0, 122, 255, 0.15);
             --dark-bg: #000000;
             --light-bg: #1c1c1e;
             --card-bg: #2c2c2e;
@@ -42,9 +42,17 @@
         
         /* --- Header --- */
         .store-header {
-            padding: 15px; background-color: rgba(28, 28, 30, 0.85); backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100;
+            padding: 15px;
+            background-color: rgba(28, 28, 30, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         .store-info { display: flex; align-items: center; gap: 12px; }
         .store-logo-link { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -52,18 +60,58 @@
         .store-logo-link:active { transform: scale(0.95); transition-duration: 0.1s; }
         .store-logo { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; display: block; }
         
+        /* --- ENHANCED STORE NAME ANIMATION --- */
         .store-name { 
-            font-size: 1.5rem; font-weight: 700; background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--primary-color));
-            background-size: 200% auto; background-clip: text; -webkit-background-clip: text; color: transparent;
-            animation: text-gradient-flow 5s ease-in-out infinite; position: relative; overflow: hidden;
+            font-size: 1.5rem; 
+            font-weight: 700;
+            display: flex;
+            position: relative; /* Needed for the shine pseudo-element */
+            overflow: hidden;   /* Keeps the shine effect contained */
         }
-        @keyframes text-gradient-flow { 0% { background-position: 200% center; } 100% { background-position: 0% center; } }
+        .store-name span {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--primary-color));
+            background-size: 200% auto;
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            animation: text-gradient-flow 5s ease-in-out infinite,
+                         letter-appear 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+        }
+        /* The new shimmer effect */
         .store-name::after {
-            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-            transform: translateX(-100%); animation: shimmer 7s infinite; animation-delay: 2s;
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transform: translateX(-100%);
+            animation: shimmer 6s infinite;
+            animation-delay: 2.5s; /* Starts after letters have appeared */
         }
-        @keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+        @keyframes text-gradient-flow { 
+            0% { background-position: 200% center; } 
+            100% { background-position: 0% center; } 
+        }
+
+        @keyframes letter-appear {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(1.2);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
 
         /* --- Buttons --- */
         .btn {
@@ -198,7 +246,6 @@
             display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px;
         }
 
-        /* --- NEW BUTTON STYLES --- */
         .step-item {
             display: flex; justify-content: space-between; align-items: center;
             padding: 12px 15px; border-radius: 10px;
@@ -223,11 +270,11 @@
         .step-info { display: flex; align-items: center; gap: 12px; }
         .step-icon svg { 
             width: 24px; height: 24px;
-            fill: var(--primary-color); /* Icon starts as blue */
+            fill: var(--primary-color);
             transition: fill 0.3s ease;
         }
         .step-item.completed .step-icon svg {
-            fill: var(--success-color); /* Icon turns green when completed */
+            fill: var(--success-color);
         }
         
         .step-status {
@@ -357,7 +404,6 @@
             </div>
 
             <div class="modal-actions">
-                <!-- NEW BUTTON HTML STRUCTURE -->
                 <div class="step-item" data-action="1">
                     <div class="step-info">
                         <div class="step-icon">
@@ -457,11 +503,22 @@
             3: "https://t.me/premiumappsale"
         };
         
+        function animateStoreName(name) {
+            headerName.innerHTML = '';
+            const letters = name.split('');
+            letters.forEach((letter, index) => {
+                const span = document.createElement('span');
+                span.innerHTML = letter === ' ' ? '&nbsp;' : letter;
+                span.style.animationDelay = `${index * 0.05}s`;
+                headerName.appendChild(span);
+            });
+        }
+
         function loadInitialData() {
             db.ref('settings').once('value', snapshot => {
                 const settings = snapshot.val();
                 if (settings) {
-                    headerName.textContent = settings.name;
+                    animateStoreName(settings.name);
                     headerLogo.src = settings.logoUrl;
                     document.title = settings.name;
                 }
@@ -589,7 +646,6 @@
             }
         }
 
-        // --- NEW EVENT LISTENER LOGIC ---
         modalActionsContainer.addEventListener('click', (e) => {
             const stepItem = e.target.closest('.step-item');
             if (!stepItem) return;
@@ -605,14 +661,13 @@
             
             spinner.classList.remove('hidden');
 
-            // Simulate verification
             setTimeout(() => {
                 spinner.classList.add('hidden');
                 checkmark.classList.remove('hidden');
                 stepItem.classList.add('completed');
                 completedActions.add(actionId);
                 checkActionsComplete();
-            }, 2000); // 2-second delay
+            }, 2000);
         });
 
         searchInput.addEventListener('input', () => { filters.search = searchInput.value; renderAppList(); });
@@ -634,4 +689,4 @@
         document.addEventListener('DOMContentLoaded', loadInitialData);
     </script>
 </body>
-        </html>
+                    </html>
