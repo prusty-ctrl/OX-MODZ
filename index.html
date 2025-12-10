@@ -9,7 +9,7 @@
         :root {
             --primary-color: #007aff;
             --secondary-color: #5856d6;
-            --primary-light: rgba(0, 122, 255, 0.1);
+            --primary-light: rgba(0, 122, 255, 0.15); /* Made the blue slightly more visible */
             --dark-bg: #000000;
             --light-bg: #1c1c1e;
             --card-bg: #2c2c2e;
@@ -159,43 +159,105 @@
         .download-footer .btn { padding: 12px 25px; font-size: 1.1rem; width: 100%; max-width: 300px; }
         .hidden { display: none !important; }
 
-        /* --- Download Popup/Modal Styles --- */
+        /* --- Remastered Download Popup/Modal Styles --- */
         #download-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
             display: flex; justify-content: center; align-items: center; z-index: 1000;
+            opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
         }
+        #download-modal-overlay:not(.hidden) {
+            opacity: 1; pointer-events: all;
+        }
+
         #download-modal {
             background-color: var(--card-bg); padding: 25px; border-radius: 16px;
             width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--border-color);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: relative;
+            transform: scale(0.95); opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
         }
-        #download-modal h2 { font-size: 1.2rem; margin-bottom: 8px; }
+        #download-modal-overlay:not(.hidden) #download-modal {
+            transform: scale(1); opacity: 1;
+        }
+
+        #download-modal h2 { font-size: 1.3rem; margin-bottom: 8px; }
         #download-modal p { color: var(--text-secondary); margin-bottom: 20px; }
-        .modal-actions { display: flex; flex-direction: column; gap: 12px; }
+
+        .progress-bar-container {
+            width: 100%; height: 8px; background-color: var(--light-bg);
+            border-radius: 4px; margin-bottom: 25px; overflow: hidden;
+        }
+        .progress-bar {
+            width: 0%; height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 4px; transition: width 0.5s ease-in-out;
+        }
+
+        .modal-actions {
+            display: flex; flex-direction: column; gap: 15px; margin-bottom: 25px;
+        }
+
+        /* --- NEW BUTTON STYLES --- */
+        .step-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 12px 15px; border-radius: 10px;
+            border: 1px solid var(--primary-color);
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .step-item:not(.completed):hover {
+            background-color: rgba(0, 122, 255, 0.25);
+        }
+
+        .step-item.completed {
+            border-color: var(--success-color);
+            background-color: rgba(52, 199, 89, 0.15);
+            color: var(--success-color);
+            cursor: not-allowed;
+        }
+
+        .step-info { display: flex; align-items: center; gap: 12px; }
+        .step-icon svg { 
+            width: 24px; height: 24px;
+            fill: var(--primary-color); /* Icon starts as blue */
+            transition: fill 0.3s ease;
+        }
+        .step-item.completed .step-icon svg {
+            fill: var(--success-color); /* Icon turns green when completed */
+        }
         
-        .modal-actions .btn {
-            width: 100%; background-color: var(--light-bg); color: var(--text-primary);
-            border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; font-size: 1rem;
-            display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s ease;
+        .step-status {
+            position: relative; width: 24px; height: 24px;
+            display: flex; justify-content: center; align-items: center;
         }
-        .modal-actions .btn:hover { background-color: var(--border-color); }
-        .modal-actions .btn .btn-icon { display: none; }
-        .modal-actions .btn.completed {
-            background-color: var(--success-color); color: white; border-color: var(--success-color); font-weight: bold;
+        
+        .step-status .spinner-icon {
+            width: 20px; height: 20px; border: 3px solid var(--text-secondary);
+            border-top-color: var(--primary-color); border-radius: 50%;
+            animation: spin 0.8s linear infinite; position: absolute;
         }
-        .modal-actions .btn.completed .btn-icon { display: inline-block; }
+        .step-status .checkmark-icon {
+            color: var(--success-color); font-size: 24px; font-weight: bold;
+            position: absolute; transform: scale(0); transition: transform 0.2s ease;
+        }
+        .step-item.completed .checkmark-icon { transform: scale(1); }
         
         #modal-download-btn {
-            width: 100%; padding: 12px; font-size: 1.1rem; margin-top: 20px;
-            border-radius: 10px; transition: all 0.3s ease;
+            width: 100%; padding: 12px; font-size: 1.1rem; margin-top: 10px;
+            border-radius: 10px; transition: all 0.3s ease; text-decoration: none;
+            display: block; box-sizing: border-box;
         }
         #modal-download-btn:disabled {
             background-color: var(--light-bg); border: 1px solid var(--border-color);
             color: var(--text-secondary); cursor: not-allowed; opacity: 0.6;
         }
         #modal-download-btn.glowing {
-            background-color: var(--primary-color); color: white; animation: glow-pulse 2s infinite;
+            background-color: var(--primary-color); color: white;
+            animation: glow-pulse 2s infinite;
         }
         @keyframes glow-pulse {
             0% { box-shadow: 0 0 4px var(--primary-color); }
@@ -204,7 +266,7 @@
         }
         
         #modal-close-btn {
-            position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.2);
+            position: absolute; top: 10px; right: 10px; background: var(--light-bg);
             border: none; color: var(--text-secondary); font-size: 1.2rem; cursor: pointer;
             width: 30px; height: 30px; border-radius: 50%; line-height: 30px;
         }
@@ -283,16 +345,55 @@
         </footer>
     </div>
     
-    <!-- Download Modal -->
+    <!-- Remastered Download Modal -->
     <div id="download-modal-overlay" class="hidden">
         <div id="download-modal">
             <button id="modal-close-btn">&times;</button>
             <h2>Follow steps to Download</h2>
             <p>Complete all 3 steps to unlock the download button.</p>
+            
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+
             <div class="modal-actions">
-                <button class="btn" id="action-btn-1" data-action="1"><span class="btn-text">Follow me on Instagram</span><span class="btn-icon">✓</span></button>
-                <button class="btn" id="action-btn-2" data-action="2"><span class="btn-text">Follow my 2nd ID</span><span class="btn-icon">✓</span></button>
-                <button class="btn" id="action-btn-3" data-action="3"><span class="btn-text">Join my Telegram Channel</span><span class="btn-icon">✓</span></button>
+                <!-- NEW BUTTON HTML STRUCTURE -->
+                <div class="step-item" data-action="1">
+                    <div class="step-info">
+                        <div class="step-icon">
+                            <svg viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.2,5.2 0,0 1,16.2 22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.2,5.2 0,0 1,7.8 2M7.6,4A3.6,3.6 0,0 0,4 7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0,0 0,20 16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0,0 1,18.5 6.75A1.25,1.25 0,0 1,17.25 8A1.25,1.25 0,0 1,16 6.75A1.25,1.25 0,0 1,17.25 5.5M12,7A5,5 0,0 1,17 12A5,5 0,0 1,12 17A5,5 0,0 1,7 12A5,5 0,0 1,12 7M12,9A3,3 0,0 0,9 12A3,3 0,0 0,12 15A3,3 0,0 0,15 12A3,3 0,0 0,12 9Z" /></svg>
+                        </div>
+                        <span>Follow me on Instagram</span>
+                    </div>
+                    <div class="step-status">
+                        <div class="spinner-icon hidden"></div>
+                        <div class="checkmark-icon hidden">✓</div>
+                    </div>
+                </div>
+                <div class="step-item" data-action="2">
+                    <div class="step-info">
+                        <div class="step-icon">
+                           <svg viewBox="0 0 24 24"><path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.2,5.2 0,0 1,16.2 22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.2,5.2 0,0 1,7.8 2M7.6,4A3.6,3.6 0,0 0,4 7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0,0 0,20 16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0,0 1,18.5 6.75A1.25,1.25 0,0 1,17.25 8A1.25,1.25 0,0 1,16 6.75A1.25,1.25 0,0 1,17.25 5.5M12,7A5,5 0,0 1,17 12A5,5 0,0 1,12 17A5,5 0,0 1,7 12A5,5 0,0 1,12 7M12,9A3,3 0,0 0,9 12A3,3 0,0 0,12 15A3,3 0,0 0,15 12A3,3 0,0 0,12 9Z" /></svg>
+                        </div>
+                        <span>Follow my 2nd ID</span>
+                    </div>
+                    <div class="step-status">
+                        <div class="spinner-icon hidden"></div>
+                        <div class="checkmark-icon hidden">✓</div>
+                    </div>
+                </div>
+                <div class="step-item" data-action="3">
+                    <div class="step-info">
+                        <div class="step-icon">
+                            <svg viewBox="0 0 24 24"><path d="M15.3,5.1L4.3,9C3.4,9.4,3.4,10.05,4.2,10.3L6.9,11.2L13.6,6.4C14,6.2,14.4,6.4,14.1,6.7L8.4,11.9L8.2,15C8.5,15,8.7,14.9,8.85,14.75L10.2,13.4L13.3,15.83C14,16.25,14.5,16.03,14.7,15.23L16.2,8.13C16.5,5.3,15.9,4.9,15.3,5.1Z" /></svg>
+                        </div>
+                        <span>Join my Telegram Channel</span>
+                    </div>
+                     <div class="step-status">
+                        <div class="spinner-icon hidden"></div>
+                        <div class="checkmark-icon hidden">✓</div>
+                    </div>
+                </div>
             </div>
             <a href="#" id="modal-download-btn" class="btn" disabled>Download Now</a>
         </div>
@@ -337,14 +438,13 @@
         const detailsDescription = document.getElementById('details-description');
         const detailsPermissions = document.getElementById('details-permissions');
         
+        // Modal elements
         const modalOverlay = document.getElementById('download-modal-overlay');
         const modalDownloadBtn = document.getElementById('modal-download-btn');
         const modalCloseBtn = document.getElementById('modal-close-btn');
-        const actionBtn1 = document.getElementById('action-btn-1');
-        const actionBtn2 = document.getElementById('action-btn-2');
-        const actionBtn3 = document.getElementById('action-btn-3');
-        const modalActionButtons = [actionBtn1, actionBtn2, actionBtn3];
-
+        const modalActionsContainer = document.querySelector('.modal-actions');
+        const progressBar = document.getElementById('progress-bar');
+        
         let allApps = {};
         let filters = { search: '', category: 'All' };
         let currentDownloadLink = '';
@@ -452,34 +552,69 @@
             homeView.style.display = 'block';
         }
 
+        function updateProgressBar() {
+            const progress = (completedActions.size / 3) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+        
         function openDownloadModal(downloadLink) {
             currentDownloadLink = downloadLink;
             completedActions.clear();
-            modalActionButtons.forEach(btn => btn.classList.remove('completed'));
+            updateProgressBar();
+
+            document.querySelectorAll('.step-item').forEach(item => {
+                item.classList.remove('completed');
+                item.querySelector('.spinner-icon').classList.add('hidden');
+                item.querySelector('.checkmark-icon').classList.add('hidden');
+            });
+
             modalDownloadBtn.disabled = true;
             modalDownloadBtn.classList.remove('glowing');
             modalDownloadBtn.removeAttribute('href');
             modalDownloadBtn.removeAttribute('target');
             modalOverlay.classList.remove('hidden');
         }
+
         function closeDownloadModal() { modalOverlay.classList.add('hidden'); }
+
         function checkActionsComplete() {
+            updateProgressBar();
             if (completedActions.size === 3) {
-                modalDownloadBtn.disabled = false;
-                modalDownloadBtn.href = currentDownloadLink;
-                modalDownloadBtn.target = "_blank";
-                modalDownloadBtn.classList.add('glowing');
+                setTimeout(() => {
+                    modalDownloadBtn.disabled = false;
+                    modalDownloadBtn.href = currentDownloadLink;
+                    modalDownloadBtn.target = "_blank";
+                    modalDownloadBtn.classList.add('glowing');
+                }, 500);
             }
         }
-        modalActionButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const actionId = button.dataset.action;
-                window.open(socialLinks[actionId], '_blank');
-                button.classList.add('completed');
+
+        // --- NEW EVENT LISTENER LOGIC ---
+        modalActionsContainer.addEventListener('click', (e) => {
+            const stepItem = e.target.closest('.step-item');
+            if (!stepItem) return;
+
+            const actionId = stepItem.dataset.action;
+            
+            if (completedActions.has(actionId)) return;
+
+            window.open(socialLinks[actionId], '_blank');
+
+            const spinner = stepItem.querySelector('.spinner-icon');
+            const checkmark = stepItem.querySelector('.checkmark-icon');
+            
+            spinner.classList.remove('hidden');
+
+            // Simulate verification
+            setTimeout(() => {
+                spinner.classList.add('hidden');
+                checkmark.classList.remove('hidden');
+                stepItem.classList.add('completed');
                 completedActions.add(actionId);
                 checkActionsComplete();
-            });
+            }, 2000); // 2-second delay
         });
+
         searchInput.addEventListener('input', () => { filters.search = searchInput.value; renderAppList(); });
         categoryFilter.addEventListener('change', () => { filters.category = categoryFilter.value; renderAppList(); });
         backBtn.addEventListener('click', showHomeView);
@@ -499,4 +634,4 @@
         document.addEventListener('DOMContentLoaded', loadInitialData);
     </script>
 </body>
-</html>
+        </html>
